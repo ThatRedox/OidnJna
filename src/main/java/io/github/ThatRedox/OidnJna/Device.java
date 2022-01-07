@@ -19,6 +19,9 @@ import com.sun.jna.Pointer;
 import io.github.ThatRedox.OidnJna.internal.Cleaner;
 import io.github.ThatRedox.OidnJna.internal.OidnJna;
 
+/**
+ * An OIDN device.
+ */
 public class Device implements AutoCloseable {
     private final Cleaner.Cleanable cleanable;
     private final OidnJna.Oidn lib;
@@ -47,6 +50,7 @@ public class Device implements AutoCloseable {
 
     /**
      * Major version number.
+     * @return major version number.
      */
     public int versionMajor() {
         return lib.oidnGetDevice1i(ptr, "versionMajor");
@@ -54,6 +58,7 @@ public class Device implements AutoCloseable {
 
     /**
      * Minor version number.
+     * @return minor version number.
      */
     public int versionMinor() {
         return lib.oidnGetDevice1i(ptr, "versionMinor");
@@ -61,6 +66,7 @@ public class Device implements AutoCloseable {
 
     /**
      * Patch version number.
+     * @return patch version number
      */
     public int versionPatch() {
         return lib.oidnGetDevice1i(ptr, "versionPatch");
@@ -68,6 +74,7 @@ public class Device implements AutoCloseable {
 
     /**
      * Get verbosity level. 0-4
+     * @return verbosity level, 0-4
      */
     public int getVerbose() {
         return lib.oidnGetDevice1i(ptr, "verbose");
@@ -75,6 +82,7 @@ public class Device implements AutoCloseable {
 
     /**
      * Set verbosity level. 0-4.
+     * @param verbose Verbosity level, 0-4.
      */
     public void setVerbose(int verbose) {
         if (0 <= verbose && verbose <= 4) {
@@ -101,6 +109,7 @@ public class Device implements AutoCloseable {
      * Get a buffer that can be used with Open Image Denoise.
      *
      * @param floatCapacity Capacity of the buffer in floats
+     * @return OIDN buffer.
      */
     public Buffer createBuffer(int floatCapacity) {
         return new Buffer(lib, this, 4L * floatCapacity);
@@ -110,6 +119,7 @@ public class Device implements AutoCloseable {
      * Create an OIDN filter.
      *
      * @param type Filter type.
+     * @return OIDN filter.
      */
     public Filter createFilter(String type) {
         return new Filter(lib, this, type);

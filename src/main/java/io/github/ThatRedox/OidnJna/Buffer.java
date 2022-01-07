@@ -4,6 +4,9 @@ import com.sun.jna.Pointer;
 import io.github.ThatRedox.OidnJna.internal.Cleaner;
 import io.github.ThatRedox.OidnJna.internal.OidnJna;
 
+/**
+ * An OIDN image buffer.
+ */
 public class Buffer implements AutoCloseable {
     private final Cleaner.Cleanable cleanable;
     private final OidnJna.Oidn lib;
@@ -24,6 +27,7 @@ public class Buffer implements AutoCloseable {
 
     /**
      * Overwrite the entire buffer with the contents of a float array.
+     * @param contents Contents to set the buffer to
      */
     public void writeBuffer(float[] contents) {
         Pointer mappedBuffer = lib.oidnMapBuffer(ptr, OidnJna.OIDN_ACCESS_WRITE_DISCARD,
@@ -34,6 +38,7 @@ public class Buffer implements AutoCloseable {
 
     /**
      * Read the entire buffer to a float array.
+     * @return the contents of the buffer
      */
     public float[] readBuffer() {
         float[] output = new float[(int) (this.bufferSize / 4)];

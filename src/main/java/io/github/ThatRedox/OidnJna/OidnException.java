@@ -1,5 +1,8 @@
 package io.github.ThatRedox.OidnJna;
 
+/**
+ * An exception in OIDN.
+ */
 public class OidnException extends RuntimeException {
     public OidnException(String exception) {
         super(exception);
