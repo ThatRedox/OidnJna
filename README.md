@@ -4,11 +4,12 @@ This is a library that provides a Java interface to [Intel Open Image Denoise](h
 through [JNA](https://github.com/java-native-access/jna).
 
 ## Before
-
+![image](https://user-images.githubusercontent.com/42661490/148583713-b889ee39-1ad4-481c-b449-5e6168285ec5.png)
 Rendered at 128 spp using [Chunky](https://chunky-dev.github.io/docs/).
 
 ## Denoised
-
+![image](https://user-images.githubusercontent.com/42661490/148583755-1efa8d87-282f-400a-9e46-58e81cccb869.png)
+Denoised with 64 spp albedo and normal maps.
 
 ## How to use
 ```java
