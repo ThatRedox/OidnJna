@@ -15,28 +15,36 @@
 
 package io.github.ThatRedox.OidnJna;
 
-import com.sun.jna.Pointer;
-import io.github.ThatRedox.OidnJna.internal.Cleaner;
+import com.sun.jna.ptr.PointerByReference;
 import io.github.ThatRedox.OidnJna.internal.OidnJna;
 
 /**
  * An OIDN device.
  */
-public class Device implements AutoCloseable {
-    private final Cleaner.Cleanable cleanable;
-    private final OidnJna.Oidn lib;
-    protected final Pointer ptr;
+public class Device extends OidnObject {
+    public class ExceptionCatch implements AutoCloseable {
+        private final PointerByReference ref = new PointerByReference();
 
-    private boolean committed = false;
+        protected ExceptionCatch() {
+            // Clear exception
+            lib.oidnGetDeviceError(ptr, ref);
+        }
 
-    protected Device(OpenImageDenoise lib, DeviceType deviceType) {
-        this.lib = lib.lib;
-        this.ptr = this.lib.oidnNewDevice(deviceType.value);
+        @Override
+        public void close() throws OidnException {
+            int code = lib.oidnGetDeviceError(ptr, ref);
+            if (code != 0) {
+                throw OidnException.fromCode(code, ref.getPointer().getString(0));
+            }
+        }
+    }
 
-        OidnJna.Oidn cleanerLib = this.lib;
-        Pointer cleanerPtr = this.ptr;
-        cleanable = Cleaner.CLEANER.create(this, () ->
-                cleanerLib.oidnReleaseDevice(cleanerPtr));
+    protected Device(OidnJna.Oidn lib, DeviceType deviceType) {
+        super(lib, lib.oidnNewDevice(deviceType.value), lib::oidnReleaseDevice);
+    }
+
+    public ExceptionCatch catchException() {
+        return new ExceptionCatch();
     }
 
     /**
@@ -84,24 +92,18 @@ public class Device implements AutoCloseable {
      * Set verbosity level. 0-4.
      * @param verbose Verbosity level, 0-4.
      */
-    public void setVerbose(int verbose) {
-        if (0 <= verbose && verbose <= 4) {
+    public void setVerbose(int verbose) throws OidnException {
+        try (ExceptionCatch e = catchException()) {
             lib.oidnSetDevice1i(ptr, "verbose", verbose);
-        } else {
-            throw new OidnException("Verbosity level must be between 0 and 4 (%d given)", verbose);
         }
     }
 
     /**
-     * Commit settings. This can only be done once per device. Committing more than once
-     * will throw an OidnException.
+     * Commit settings. This can only be done once per device.
      */
-    public void commit() {
-        if (!committed) {
+    public void commit() throws OidnException {
+        try (ExceptionCatch e = new ExceptionCatch()) {
             lib.oidnCommitDevice(ptr);
-            committed = true;
-        } else {
-            throw new OidnException("Device can only be committed once.");
         }
     }
 
@@ -111,8 +113,10 @@ public class Device implements AutoCloseable {
      * @param floatCapacity Capacity of the buffer in floats
      * @return OIDN buffer.
      */
-    public Buffer createBuffer(int floatCapacity) {
-        return new Buffer(lib, this, 4L * floatCapacity);
+    public Buffer createBuffer(int floatCapacity) throws OidnException {
+        try (ExceptionCatch e = catchException()) {
+            return new Buffer(lib, this, 4L * floatCapacity);
+        }
     }
 
     /**
@@ -121,12 +125,9 @@ public class Device implements AutoCloseable {
      * @param type Filter type.
      * @return OIDN filter.
      */
-    public Filter createFilter(String type) {
-        return new Filter(lib, this, type);
-    }
-
-    @Override
-    public void close() {
-        cleanable.clean();
+    public Filter createFilter(String type) throws OidnException {
+        try (ExceptionCatch e = catchException()) {
+            return new Filter(lib, this, type);
+        }
     }
 }

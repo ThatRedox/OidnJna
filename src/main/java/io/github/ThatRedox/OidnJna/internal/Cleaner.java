@@ -47,7 +47,7 @@ public class Cleaner extends Thread {
     }
 
     public Cleaner() {
-        super();
+        super("OIDN Cleanup Thread");
         this.setDaemon(true);
     }
 

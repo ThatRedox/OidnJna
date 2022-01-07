@@ -16,6 +16,8 @@
 package io.github.ThatRedox.OidnJna;
 
 import com.sun.jna.Native;
+import com.sun.jna.Pointer;
+import com.sun.jna.ptr.PointerByReference;
 import io.github.ThatRedox.OidnJna.internal.OidnJna;
 
 /**
@@ -47,6 +49,18 @@ public class OpenImageDenoise {
      * @return An OIDN device.
      */
     public Device createDevice(DeviceType deviceType) {
-        return new Device(this, deviceType);
+        PointerByReference reference = new PointerByReference();
+        // Clear the error
+        lib.oidnGetDeviceError(Pointer.NULL, reference);
+
+        Device device = new Device(this.lib, deviceType);
+
+        // Catch an error
+        int code = lib.oidnGetDeviceError(device.ptr, reference);
+        if (code != 0) {
+            throw OidnException.fromCode(code, reference.getPointer().getString(0));
+        }
+
+        return device;
     }
 }

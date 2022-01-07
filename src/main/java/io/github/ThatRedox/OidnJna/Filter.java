@@ -15,26 +15,18 @@
 
 package io.github.ThatRedox.OidnJna;
 
-import com.sun.jna.Pointer;
-import io.github.ThatRedox.OidnJna.internal.Cleaner;
 import io.github.ThatRedox.OidnJna.internal.OidnJna;
 
 /**
  * An OIDN filter.
  */
-public class Filter implements AutoCloseable {
-    private final Cleaner.Cleanable cleanable;
-    private final OidnJna.Oidn lib;
-    protected final Pointer ptr;
+public class Filter extends OidnObject {
+    private final Device device;
 
     protected Filter(OidnJna.Oidn lib, Device device, String type) {
-        this.lib = lib;
-        this.ptr = this.lib.oidnNewFilter(device.ptr, type);
-
-        OidnJna.Oidn cleanerLib = this.lib;
-        Pointer cleanerPtr = this.ptr;
-        cleanable = Cleaner.CLEANER.create(this, () ->
-                cleanerLib.oidnReleaseFilter(cleanerPtr));
+        super(lib, lib.oidnNewFilter(device.ptr, type),
+                lib::oidnReleaseFilter);
+        this.device = device;
     }
 
     /**
@@ -45,9 +37,11 @@ public class Filter implements AutoCloseable {
      * @param height Height of the image
      */
     public void setFilterImage(String name, Buffer buffer, long width, long height) {
-        lib.oidnSetFilterImage(ptr, name, buffer.ptr, 3,
-                new OidnJna.size_t(width), new OidnJna.size_t(height),
-                OidnJna.ZERO, OidnJna.ZERO, OidnJna.ZERO);
+        try (Device.ExceptionCatch e = device.catchException()) {
+            lib.oidnSetFilterImage(ptr, name, buffer.ptr, 3,
+                    new OidnJna.size_t(width), new OidnJna.size_t(height),
+                    OidnJna.ZERO, OidnJna.ZERO, OidnJna.ZERO);
+        }
     }
 
     /**
@@ -64,38 +58,48 @@ public class Filter implements AutoCloseable {
      * @param value Desired value
      */
     public void setFilterParam(String name, boolean value) {
-        lib.oidnSetFilter1b(ptr, name, value);
+        try (Device.ExceptionCatch e = device.catchException()) {
+            lib.oidnSetFilter1b(ptr, name, value);
+        }
     }
 
     /**
-     * Set a filter parameter.
+     * Set a filter parameter. See https://www.openimagedenoise.org/documentation.html for a full list of parameters.
      * @param name  Filter parameter name
      * @param value Desired value
      */
     public void setFilterParam(String name, int value) {
-        lib.oidnSetFilter1i(ptr, name, value);
+        try (Device.ExceptionCatch e = device.catchException()) {
+            lib.oidnSetFilter1i(ptr, name, value);
+        }
     }
 
     /**
-     * Set a filter parameter.
+     * Set a filter parameter. See https://www.openimagedenoise.org/documentation.html for a full list of parameters.
      * @param name  Filter parameter name
      * @param value Desired value
      */
     public void setFilterParam(String name, float value) {
-        lib.oidnSetFilter1f(ptr, name, value);
+        try (Device.ExceptionCatch e = device.catchException()) {
+            lib.oidnSetFilter1f(ptr, name, value);
+        }
     }
 
     /**
-     * Get the value of a boolean filter parameter.
+     * Get the value of a boolean filter parameter. See https://www.openimagedenoise.org/documentation.html
+     * for a full list of parameters.
      * @param name Filter parameter name
      * @return     Boolean value of the filter parameter.
      */
     public boolean getFilterValueB(String name) {
-        return lib.oidnGetFilter1b(ptr, name);
+        try (Device.ExceptionCatch e = device.catchException()) {
+            return lib.oidnGetFilter1b(ptr, name);
+        }
     }
 
     /**
-     * Get the value of an integer filter parameter.
+     * Get the value of an integer filter parameter. See https://www.openimagedenoise.org/documentation.html
+     * for a full list of parameters.
      * @param name Filter parameter name
      * @return     Integer value of the filter parameter.
      */
@@ -104,7 +108,8 @@ public class Filter implements AutoCloseable {
     }
 
     /**
-     * Get the value of a float filter parameter.
+     * Get the value of a float filter parameter. See https://www.openimagedenoise.org/documentation.html
+     * for a full list of parameters.
      * @param name Filter parameter name
      * @return     Float value of the filter parameter.
      */
@@ -116,17 +121,17 @@ public class Filter implements AutoCloseable {
      * Commit the changes to the filter.
      */
     public void commit() {
-        lib.oidnCommitFilter(ptr);
+        try (Device.ExceptionCatch e = device.catchException()) {
+            lib.oidnCommitFilter(ptr);
+        }
     }
 
     /**
      * Execute the filter and denoise the image.
      */
     public void execute() {
-        lib.oidnExecuteFilter(ptr);
-    }
-
-    public void close() {
-        cleanable.clean();
+        try (Device.ExceptionCatch e = device.catchException()) {
+            lib.oidnExecuteFilter(ptr);
+        }
     }
 }
