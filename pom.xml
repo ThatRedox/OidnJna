@@ -32,6 +32,14 @@
         <url>https://github.com/ThatRedox/OidnJna</url>
     </scm>
 
+    <distributionManagement>
+        <repository>
+            <id>github</id>
+            <name>GitHub ThatRedox Apache Maven Packages</name>
+            <url>https://maven.pkg.github.com/ThatRedox/OidnJna</url>
+        </repository>
+    </distributionManagement>
+
     <properties>
         <maven.compiler.source>8</maven.compiler.source>
         <maven.compiler.target>8</maven.compiler.target>
@@ -67,6 +75,9 @@
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-javadoc-plugin</artifactId>
                 <version>2.9.1</version>
+                <configuration>
+                    <source>8</source>
+                </configuration>
                 <executions>
                     <execution>
                         <id>attach-javadocs</id>
